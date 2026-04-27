@@ -51,4 +51,6 @@ export const getLowAttendance = (threshold) =>
 export const getSubjectWise = () => api.get('/reports/subject-wise');
 export const getDailySummary = (subject_id) =>
   api.get('/reports/daily-summary', { params: { subject_id } });
+export const getStudentSummary = (student_id) =>
+  api.get('/reports/student-summary', { params: { student_id } });
 export default api;

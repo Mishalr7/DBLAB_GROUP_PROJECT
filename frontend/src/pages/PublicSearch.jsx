@@ -165,6 +165,50 @@ export default function PublicSearch() {
               </div>
             </div>
 
+            <div className="card" style={{ marginTop: '24px', borderRadius: '20px' }}>
+              <h3 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>📚</span> Subject-wise Breakdown
+              </h3>
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Subject</th>
+                      <th>Total</th>
+                      <th>Present</th>
+                      <th>Absent</th>
+                      <th>Late</th>
+                      <th>Percentage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attendanceData.map(s => (
+                      <tr key={s.subject_id}>
+                        <td><strong>{s.subject_name}</strong></td>
+                        <td>{s.total_classes}</td>
+                        <td><span className="badge badge-present">{s.present_count}</span></td>
+                        <td><span className="badge badge-absent">{s.absent_count}</span></td>
+                        <td><span className="badge badge-late">{s.late_count}</span></td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="pct-bar" style={{ width: '60px', marginBottom: 0 }}>
+                              <div 
+                                className={`pct-fill ${getPctClass(s.attendance_percentage)}`} 
+                                style={{ width: `${s.attendance_percentage}%` }} 
+                              />
+                            </div>
+                            <strong style={{ color: s.attendance_percentage >= 75 ? 'var(--success)' : 'var(--danger)' }}>
+                              {s.attendance_percentage}%
+                            </strong>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
 
             
             <div style={{ textAlign: 'center', marginTop: '40px' }}>

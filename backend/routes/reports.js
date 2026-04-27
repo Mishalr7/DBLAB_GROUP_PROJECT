@@ -170,4 +170,27 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
   }
 });
 
+// Detailed subject-wise breakdown for all students
+// Uses: VIEW (student_attendance_summary)
+router.get('/student-summary', isAuthenticated, async (req, res) => {
+  try {
+    const { student_id } = req.query;
+    let query = 'SELECT * FROM student_attendance_summary';
+    const params = [];
+
+    if (student_id) {
+      query += ' WHERE student_id = ?';
+      params.push(student_id);
+    }
+
+    query += ' ORDER BY roll_no, subject_name';
+
+    const [rows] = await pool.execute(query, params);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching student summary:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

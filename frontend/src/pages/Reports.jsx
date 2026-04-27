@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { getPercentage, getLowAttendance, getSubjectWise, getDailySummary, getSubjects } from '../api';
+import { getPercentage, getLowAttendance, getSubjectWise, getDailySummary, getSubjects, getStudentSummary } from '../api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function Reports() {
@@ -33,6 +33,9 @@ export default function Reports() {
         case 'subject':
           res = await getSubjectWise();
           break;
+        case 'detailed':
+          res = await getStudentSummary();
+          break;
         case 'daily':
           res = await getDailySummary(selectedSubject || undefined);
           break;
@@ -48,9 +51,10 @@ export default function Reports() {
   const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444'];
 
   const filteredData = data.filter(d => {
-    if ((tab !== 'percentage' && tab !== 'low') || !search) return true;
+    if ((tab !== 'percentage' && tab !== 'low' && tab !== 'detailed') || !search) return true;
     const term = search.toLowerCase();
-    return d.roll_no?.toString().includes(term) || d.name?.toLowerCase().includes(term);
+    const name = tab === 'detailed' ? d.student_name : d.name;
+    return d.roll_no?.toString().includes(term) || name?.toLowerCase().includes(term);
   });
 
   return (
@@ -71,6 +75,9 @@ export default function Reports() {
         </button>
         <button className={`tab ${tab === 'subject' ? 'active' : ''}`} onClick={() => setTab('subject')}>
           Subject-wise
+        </button>
+        <button className={`tab ${tab === 'detailed' ? 'active' : ''}`} onClick={() => setTab('detailed')}>
+          Detailed Breakdown
         </button>
         <button className={`tab ${tab === 'daily' ? 'active' : ''}`} onClick={() => setTab('daily')}>
           Daily Summary
@@ -253,6 +260,55 @@ export default function Reports() {
                 </table>
               </div>
             </>
+          )}
+
+
+          {tab === 'detailed' && (
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Total</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Late</th>
+                    <th>Percentage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData.map((d, i) => (
+                    <tr key={i}>
+                      <td><strong>{d.roll_no}</strong></td>
+                      <td>{d.student_name}</td>
+                      <td>{d.subject_name}</td>
+                      <td>{d.total_classes}</td>
+                      <td><span className="badge badge-present">{d.present_count}</span></td>
+                      <td><span className="badge badge-absent">{d.absent_count}</span></td>
+                      <td><span className="badge badge-late">{d.late_count}</span></td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div className="pct-bar" style={{ width: '60px', marginBottom: 0 }}>
+                            <div 
+                              className={`pct-fill ${getPctClass(d.attendance_percentage)}`} 
+                              style={{ width: `${d.attendance_percentage}%` }} 
+                            />
+                          </div>
+                          <strong style={{ color: d.attendance_percentage >= 75 ? '#10b981' : '#ef4444' }}>
+                            {d.attendance_percentage}%
+                          </strong>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredData.length === 0 && (
+                    <tr><td colSpan="8" style={{ textAlign: 'center', color: '#9ca3af' }}>No data</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
 
 
